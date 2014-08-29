@@ -64,6 +64,16 @@ class Smarty extends \Slim\View
     public $parserCacheDirectory = null;
 
     /**
+     * @var string The path to the Smarty config folder WITHOUT the trailing slash
+     */
+    public $parserConfigDirectory = null;
+
+    /**
+     * @var 
+     */
+	public $config_load = array();
+
+    /**
      * @var SmartyExtensions The Smarty extensions directory you want to load plugins from
      */
     public $parserExtensions = array();
@@ -117,23 +127,43 @@ class Smarty extends \Slim\View
             if ($this->parserCacheDirectory) {
                 $this->parserInstance->cache_dir  = $this->parserCacheDirectory;
             }
+			 if ($this->parserConfigDirectory) {
+                $this->parserInstance->setConfigDir($this->parserConfigDirectory);
+            }
+			
+			if (!empty($this->config_load)) {
+				foreach ($this->config_load as $file => $section)
+				{
+					if ($section == null)
+						$this->parserInstance->ConfigLoad($file);
+					else
+						$this->parserInstance->ConfigLoad($file,$section);
+				}
+			}
+
         }
 
         return $this->parserInstance;
     }
-    
-    /**
+	
+	
+	/**
      * Set the base directory that contains view templates
-     * @param   string|array $directory
+     * @param   string $directory
      * @throws  \InvalidArgumentException If directory is not a directory
      */
 
-	 public function setTemplatesDirectory($directory)
+	public function setTemplatesDirectory($directory)
     {
 		if (is_array($directory))
 			$this->templatesDirectory = array_map( 'rtrim', $directory );
 		else
 			$this->templatesDirectory = rtrim($directory, DIRECTORY_SEPARATOR);
     }
-    
+
+	public function config_load($file, $section = null)
+	{
+		$this->config_load[$file] = $section;
+	}
+	
 }
